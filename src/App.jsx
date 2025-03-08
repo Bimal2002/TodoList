@@ -1,40 +1,48 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useTheme } from "./theme-context";
 import "./App.css";
 
 function App() {
+  const { theme, toggleTheme } = useTheme();
   const [todos, setTodos] = useState([]);
-  const [newtodo, setNewTodo] = useState("");
+  const [newTodo, setNewTodo] = useState("");
 
+  // Add a new todo
   const addTodo = () => {
-    if (newtodo.trim() === "") return;
-    setTodos([...todos, { text: newtodo, isCompleted: false, isEditing: false }]);
+    if (newTodo.trim() === "") return;
+    setTodos([...todos, { text: newTodo, isCompleted: false, isEditing: false }]);
     setNewTodo("");
   };
 
+  // Delete a todo
   const deleteTodo = (index) => {
     const newTodos = [...todos];
     newTodos.splice(index, 1);
     setTodos(newTodos);
   };
 
+  // Toggle todo completion
   const toggleComplete = (index) => {
     const newTodos = [...todos];
     newTodos[index].isCompleted = !newTodos[index].isCompleted;
     setTodos(newTodos);
   };
 
+  // Enable todo editing
   const editTodo = (index) => {
     const newTodos = [...todos];
     newTodos[index].isEditing = !newTodos[index].isEditing;
     setTodos(newTodos);
   };
 
+  // Update todo text
   const updateTodoText = (index, newText) => {
     const newTodos = [...todos];
     newTodos[index].text = newText;
     setTodos(newTodos);
   };
 
+  // Save edited todo
   const saveTodo = (index) => {
     const newTodos = [...todos];
     newTodos[index].isEditing = false;
@@ -42,69 +50,55 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Todo List</h1>
-      <div className="flex gap-2 mb-4">
+    <div className={`app ${theme}`}>
+      <h1>Todo List</h1>
+
+      {/* Theme Toggle Button */}
+      <button onClick={toggleTheme} className="theme-toggle">
+        Switch to {theme === "light" ? "Dark" : "Light"} Mode
+      </button>
+
+      {/* Add Todo Input */}
+      <div className="todo-input">
         <input
           type="text"
-          className="border p-2 rounded w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="Add a todo..."
-          value={newtodo}
+          placeholder="Add a new todo..."
+          value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
         />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          onClick={addTodo}
-        >
-          Add
-        </button>
+        <button onClick={addTodo}>Add</button>
       </div>
-      <ul className="w-80 bg-white p-4 rounded-lg shadow">
+
+      {/* Todo List */}
+       {/* Todo List */}
+       <ul className="todo-list">
         {todos.map((todo, index) => (
           <li
             key={index}
-            className="flex justify-between items-center p-2 border-b last:border-none"
+            className={`todo-item ${todo.isCompleted ? "completed" : ""} ${theme === "dark" ? "dark-todo" : ""}`}
           >
             {todo.isEditing ? (
               <input
                 type="text"
-                className="border p-1 rounded w-full"
                 value={todo.text}
                 onChange={(e) => updateTodoText(index, e.target.value)}
+                className={theme === "dark" ? "dark-input" : ""}
               />
             ) : (
-              <span className={`flex-1 ${todo.isCompleted ? "line-through text-gray-500" : "text-gray-800"}`}>
+              <span className={theme === "dark" ? "dark-text" : "light-text"}>
                 {todo.text}
               </span>
             )}
 
-            <div className="flex gap-2">
-              <button
-                className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                onClick={() => toggleComplete(index)}
-              >
+            <div className="todo-actions">
+              <button onClick={() => toggleComplete(index)}>
                 {todo.isCompleted ? "Undo" : "Complete"}
               </button>
-              <button
-                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                onClick={() => deleteTodo(index)}
-              >
-                Delete
-              </button>
+              <button onClick={() => deleteTodo(index)}>Delete</button>
               {todo.isEditing ? (
-                <button
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                  onClick={() => saveTodo(index)}
-                >
-                  Save
-                </button>
+                <button onClick={() => saveTodo(index)}>Save</button>
               ) : (
-                <button
-                  className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                  onClick={() => editTodo(index)}
-                >
-                  Edit
-                </button>
+                <button onClick={() => editTodo(index)}>Edit</button>
               )}
             </div>
           </li>
